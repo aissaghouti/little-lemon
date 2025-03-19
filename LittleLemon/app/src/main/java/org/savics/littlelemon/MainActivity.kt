@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.navigation.compose.rememberNavController
 import org.savics.littlelemon.ui.theme.LittleLemonTheme
 
 class MainActivity : ComponentActivity() {
@@ -16,7 +17,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             LittleLemonTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    Onboarding()
+                    val navController = rememberNavController()
+                    Navigation(navController = navController, context = this)
                 }
             }
         }
