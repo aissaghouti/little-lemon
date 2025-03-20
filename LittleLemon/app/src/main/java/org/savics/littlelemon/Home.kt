@@ -64,11 +64,13 @@ fun Home(navController: NavHostController, menuItemsLiveData: LiveData<List<Menu
     // State for category filter
     var selectedCategory by remember { mutableStateOf("") }
 
-    // Filter menu items by category if one is selected
-    val filteredItems = if (selectedCategory.isEmpty()) {
-        menuItems
-    } else {
-        menuItems.filter { it.category.equals(selectedCategory, ignoreCase = true) }
+    // State for search phrase
+    var searchPhrase by remember { mutableStateOf("") }
+
+    // Filter menu items by search phrase and category
+    val filteredItems = menuItems.filter { menuItem ->
+        (searchPhrase.isEmpty() || menuItem.title.contains(searchPhrase, ignoreCase = true)) &&
+                (selectedCategory.isEmpty() || menuItem.category.equals(selectedCategory, ignoreCase = true))
     }
 
     Column(
@@ -107,8 +109,8 @@ fun Home(navController: NavHostController, menuItemsLiveData: LiveData<List<Menu
             )
         }
 
-        // Hero Section
-        HeroSection()
+        // Hero Section with search functionality
+        HeroSection(searchPhrase = searchPhrase, onSearchPhraseChanged = { searchPhrase = it })
 
         // Category filters and menu items
         LazyColumn(
@@ -141,11 +143,87 @@ fun Home(navController: NavHostController, menuItemsLiveData: LiveData<List<Menu
                 )
             }
 
-            // Menu Items
+            // Menu Items - filtered by both search phrase and category
             items(filteredItems) { menuItem ->
                 MenuItem(menuItem = menuItem)
             }
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HeroSection(searchPhrase: String, onSearchPhraseChanged: (String) -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(littleLemonGreen)
+            .padding(16.dp)
+    ) {
+        Text(
+            text = "Little Lemon",
+            fontSize = 40.sp,
+            fontWeight = FontWeight.Bold,
+            color = littleLemonYellow
+        )
+
+        Text(
+            text = "Chicago",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Medium,
+            color = Color.White
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "We are a family owned Mediterranean restaurant, focused on traditional recipes served with a modern twist.",
+                fontSize = 16.sp,
+                color = Color.White,
+                modifier = Modifier.weight(0.6f)
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Image(
+                painter = painterResource(id = R.drawable.hero),
+                contentDescription = "Restaurant Food",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(120.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .weight(0.4f)
+            )
+        }
+
+        // Search Bar - Updated to use the passed parameters
+        OutlinedTextField(
+            value = searchPhrase,
+            onValueChange = { onSearchPhraseChanged(it) },
+            placeholder = { Text("Enter search phrase", color = Color.Gray) },
+            leadingIcon = {
+                Icon(
+                    Icons.Default.Search,
+                    contentDescription = "Search",
+                    tint = Color.Gray
+                )
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp, bottom = 4.dp),
+            singleLine = true,
+            shape = RoundedCornerShape(8.dp),
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = Color.Gray,
+                unfocusedBorderColor = Color.Gray,
+                containerColor = Color.White
+            )
+        )
     }
 }
 
